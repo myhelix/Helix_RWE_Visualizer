@@ -1,0 +1,24 @@
+# macOS
+.DS_Store
+
+# Claude Code settings
+.claude/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Local dev only — not needed for the website
+test_plot.html
+SESSION_NOTES.md
+
+# Preprocessing artifacts
+data/search_index.json
+
+# Papers, figures, and data-processing files — keep off public repo
+*.pdf
+*.png
+*.ipynb
+*.tsv
+preprocess.py

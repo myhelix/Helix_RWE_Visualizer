@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VUS Evidence Visualizer — Internal</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="plotly.min.js" charset="utf-8"></script>
+  <!-- Internal version: shows RWE + NewCategory + ClinVar -->
+  <script>window.APP_CONFIG = { showFullData: true };</script>
+</head>
+<body>
+
+<header style="background: #2a3550;">
+  <h1>VUS Evidence Visualizer <span style="font-size:0.65em; font-weight:400; opacity:0.75; margin-left:8px;">Internal</span></h1>
+  <p>Visualize likelihood ratio evidence for variant classification using real-world electronic health record data</p>
+</header>
+
+<main>
+
+  <!-- Search -->
+  <section class="search-section">
+    <div class="search-row">
+      <div class="gene-select-wrapper">
+        <label for="gene-select">Gene</label>
+        <select id="gene-select">
+          <option value="">Select a gene…</option>
+        </select>
+      </div>
+      <div class="variant-search-wrapper">
+        <label for="variant-search">Variant</label>
+        <input
+          type="text"
+          id="variant-search"
+          placeholder="Search by protein change (p.Leu123Arg), DNA change (c.368T>G), or genomic ID…"
+          autocomplete="off"
+          spellcheck="false"
+        >
+      </div>
+    </div>
+    <div id="search-results" class="search-results hidden"></div>
+  </section>
+
+  <!-- Variant detail + plot (hidden until variant selected) -->
+  <section id="variant-section" class="variant-section hidden">
+
+    <div class="variant-info-card">
+      <div class="variant-header">
+        <div class="variant-title">
+          <span id="disp-gene" class="gene-badge"></span>
+          <span id="disp-hgvsp" class="hgvsp"></span>
+        </div>
+        <div class="variant-meta">
+          <span id="disp-hgvsc"></span>
+          <span id="disp-genomic" class="genomic-id"></span>
+          <span id="disp-consequence"></span>
+        </div>
+      </div>
+      <div class="variant-classifications">
+        <div class="class-item">
+          <span class="class-label">RWE Classification</span>
+          <span id="disp-rwe" class="class-badge"></span>
+        </div>
+        <!-- Full-data fields: always shown on internal page -->
+        <div class="class-item full-data-only">
+          <span class="class-label">New Category</span>
+          <span id="disp-nc" class="class-badge"></span>
+        </div>
+        <div class="class-item full-data-only">
+          <span class="class-label">ClinVar</span>
+          <span id="disp-cv" class="class-value"></span>
+        </div>
+        <div class="class-item">
+          <span class="class-label">Likelihood Ratio</span>
+          <span id="disp-lr" class="class-value"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quantitative gene notice -->
+    <div id="quant-notice" class="quant-notice hidden">
+      <p><strong>Quantitative trait gene</strong> — This gene uses a continuous phenotype (LDL Cholesterol).
+      The LR framework visualization for quantitative traits is coming soon.</p>
+    </div>
+
+    <!-- Plot -->
+    <div id="plot-container"></div>
+
+    <!-- Downgrade note (shown for sample-size-limited variants) -->
+    <div id="downgrade-note" class="downgrade-note hidden"></div>
+
+  </section>
+
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
