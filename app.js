@@ -59,8 +59,7 @@ async function init() {
     const warn = document.createElement('div');
     warn.style.cssText = 'background:#c00;color:#fff;padding:16px 24px;font-weight:bold;font-size:1rem;text-align:center';
     warn.innerHTML = 'Page opened as a local file — data cannot load. '
-      + 'Please start the server: <code style="background:rgba(0,0,0,0.3);padding:2px 6px">./serve.sh</code> '
-      + 'then open <a style="color:#fff" href="http://localhost:8080/index.html">http://localhost:8080/index.html</a>';
+      + 'Open the page via the hosted URL instead.';
     document.body.insertBefore(warn, document.body.firstChild);
     return;
   }
@@ -73,11 +72,8 @@ async function init() {
   } catch (e) {
     document.querySelector('main').innerHTML =
       `<div style="padding:32px;color:#c00;font-size:1rem">
-        <b>Cannot reach the server.</b><br>Start it with:
-        <code style="display:block;margin:8px 0;padding:8px;background:#f4f4f4;border-radius:4px">
-          cd /Users/liz.cirulli/claudecode/rwe &amp;&amp; ./serve.sh
-        </code>
-        Then reload <a href="http://localhost:8080/index.html">http://localhost:8080/index.html</a>
+        <b>Failed to load site data.</b><br>
+        <a href="javascript:location.reload()">Reload the page</a> to try again.
       </div>`;
     return;
   }
@@ -169,8 +165,6 @@ async function loadGeneData(gene) {
   } catch (e) {
     searchResults.innerHTML = `<div class="loading-msg" style="color:#c00">
       Failed to load ${gene} data: ${e.message}<br>
-      Make sure the server is running:<br>
-      <code style="font-size:0.85em">cd /Users/liz.cirulli/claudecode/rwe && ./serve.sh</code><br>
       <a href="#" onclick="location.reload();return false;" style="color:#3c486c">Reload page</a>
     </div>`;
     loadingGenes.delete(gene);
