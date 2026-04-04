@@ -300,6 +300,8 @@ function selectVariant(gene, record) {
     }
     const cvEl = document.getElementById('disp-cv');
     if (cvEl) cvEl.textContent = record.cv || '—';
+    const apEl = document.getElementById('disp-ap');
+    if (apEl) apEl.textContent = record.ap != null ? record.ap : '—';
   }
 
   const lrFmt = record.lr == null ? '—'
