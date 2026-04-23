@@ -8,6 +8,168 @@
   <script src="plotly.min.js" charset="utf-8"></script>
   <!-- Public version: RWE classification only -->
   <script>window.APP_CONFIG = { showFullData: false };</script>
+  <style>
+    /* ---- About section styles ---- */
+
+    .about-divider {
+      border: none;
+      border-top: 1px solid var(--color-border);
+      margin: 44px 0 36px;
+    }
+    .about-heading {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--color-text-muted);
+      margin-bottom: 20px;
+    }
+
+    /* ---- Stats row ---- */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow);
+      padding: 20px 16px;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--color-primary);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .stat-label {
+      font-size: 0.76rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--color-text-muted);
+    }
+
+    /* ---- Shared card ---- */
+    .about-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: 26px 30px;
+      margin-bottom: 22px;
+    }
+    .about-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 6px;
+    }
+    .about-card .card-desc {
+      font-size: 0.88rem;
+      color: var(--color-text-muted);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    /* ---- Description ---- */
+    .description-text {
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+      line-height: 1.7;
+      max-width: 820px;
+    }
+
+    /* ---- Gene / phenotype grid ---- */
+    .phenotype-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+    }
+    .phenotype-col {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 13px 15px;
+    }
+    .phenotype-name {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--color-primary);
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      border-bottom: 2px solid var(--color-primary);
+    }
+    .gene-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .gene-list li {
+      font-size: 0.87rem;
+      font-weight: 600;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      color: var(--color-text);
+    }
+
+    /* ---- Figures ---- */
+    .figures-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+    .figure-wrap { text-align: center; }
+    .figure-wrap img {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+    }
+    .figure-caption {
+      margin-top: 10px;
+      font-size: 0.83rem;
+      color: var(--color-text-muted);
+      line-height: 1.55;
+      font-style: italic;
+      text-align: left;
+    }
+
+    /* ---- Citation placeholder ---- */
+    .citation-box {
+      background: var(--color-bg);
+      border: 1.5px dashed var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 18px 22px;
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+      line-height: 1.6;
+    }
+    .citation-box strong {
+      font-style: normal;
+      color: var(--color-text);
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 960px) {
+      .phenotype-grid { grid-template-columns: repeat(3, 1fr); }
+      .figures-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 680px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .phenotype-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
 </head>
 <body>
 
@@ -90,6 +252,168 @@
     <div id="downgrade-note" class="downgrade-note hidden"></div>
 
   </section>
+
+  <!-- ============================================================
+       About this resource
+       ============================================================ -->
+
+  <hr class="about-divider">
+  <p class="about-heading">About this resource</p>
+
+  <!-- Description -->
+  <div class="about-card">
+    <h3>Overview</h3>
+    <p class="description-text">
+      Classifying variants of uncertain significance (VUS) is one of the central challenges in clinical genomics.
+      This tool provides real-world evidence (RWE) derived from a large EHR-linked biobank, quantified as
+      likelihood ratios (LRs) within the ACMG/AMP Bayesian evidence framework. For each variant, the observed
+      association with its disease phenotype is translated into a calibrated ACMG/AMP evidence category —
+      from BVS through BM for benign-supporting, and PP through PVS for pathogenic-supporting evidence.
+      Evidence can be combined with other variant-level criteria to support classification or reclassification.
+    </p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-number">36</div>
+      <div class="stat-label">Genes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">5</div>
+      <div class="stat-label">Disease Phenotypes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">~143K</div>
+      <div class="stat-label">Variants with Evidence</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">9</div>
+      <div class="stat-label">Evidence Categories</div>
+    </div>
+  </div>
+
+  <!-- Genes & Phenotypes -->
+  <div class="about-card">
+    <h3>Genes and Phenotypes</h3>
+    <p class="card-desc">
+      RWE is derived from disease-phenotype associations measured in a biobank population across 5 hereditary disease phenotypes.
+    </p>
+    <div class="phenotype-grid">
+
+      <div class="phenotype-col">
+        <div class="phenotype-name">Breast Cancer</div>
+        <ul class="gene-list">
+          <li>BRCA1</li>
+          <li>BRCA2</li>
+          <li>ATM</li>
+          <li>BARD1</li>
+          <li>CDH1</li>
+          <li>CHEK2</li>
+          <li>NF1</li>
+          <li>PALB2</li>
+          <li>PTEN</li>
+          <li>RAD51C</li>
+          <li>RAD51D</li>
+          <li>TP53</li>
+        </ul>
+      </div>
+
+      <div class="phenotype-col">
+        <div class="phenotype-name">Lynch Syndrome</div>
+        <ul class="gene-list">
+          <li>MLH1</li>
+          <li>MSH2</li>
+          <li>MSH6</li>
+          <li>PMS2</li>
+        </ul>
+      </div>
+
+      <div class="phenotype-col">
+        <div class="phenotype-name">Cardiomyopathy</div>
+        <ul class="gene-list">
+          <li>BAG3</li>
+          <li>BRAF</li>
+          <li>DSP</li>
+          <li>FLNC</li>
+          <li>LMNA</li>
+          <li>PKP2</li>
+          <li>PLN</li>
+          <li>RBM20</li>
+          <li>SCN5A</li>
+          <li>TNNI3K</li>
+          <li>TNNT2</li>
+          <li>TTN</li>
+          <li>TTR</li>
+        </ul>
+      </div>
+
+      <div class="phenotype-col">
+        <div class="phenotype-name">Hypertrophic Cardiomyopathy</div>
+        <ul class="gene-list">
+          <li>MYBPC3</li>
+          <li>MYH7</li>
+          <li>MYL2</li>
+          <li>TNNI3</li>
+        </ul>
+      </div>
+
+      <div class="phenotype-col">
+        <div class="phenotype-name">LDL Cholesterol</div>
+        <ul class="gene-list">
+          <li>APOB</li>
+          <li>LDLR</li>
+          <li>PCSK9</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Performance figures -->
+  <div class="about-card">
+    <h3>Evidence Performance</h3>
+    <p class="card-desc">
+      RWE evidence categories are concordant with existing variant classifications and resolve a substantial fraction
+      of the VUS carrier burden across all 36 genes.
+    </p>
+    <div class="figures-row">
+
+      <div class="figure-wrap">
+        <img
+          src="evidence_strength_diverging_final_quantandbinary.png"
+          alt="Diverging bar chart showing percent of variants with benign- or pathogenic-supporting RWE, stratified by ClinVar classification"
+        >
+        <p class="figure-caption">
+          Percentage of variants with benign-supporting (left) or pathogenic-supporting (right) RWE evidence,
+          stratified by ClinVar classification. Evidence direction is concordant with prior classification across
+          all variant groups.
+        </p>
+      </div>
+
+      <div class="figure-wrap">
+        <img
+          src="gene_reclassification_stacked_bar%20(9).png"
+          alt="Stacked bar chart showing the percent of VUS carriers reclassified per gene"
+        >
+        <p class="figure-caption">
+          Proportion of individuals carrying a VUS who receive an actionable reclassification
+          (to B/LB or P/LP) based on RWE evidence, per gene.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Citation placeholder -->
+  <div class="about-card">
+    <h3>Citation</h3>
+    <div class="citation-box">
+      <strong>Manuscript in preparation</strong>
+      A manuscript describing this resource is currently under review.
+      Citation information will be added upon publication.
+    </div>
+  </div>
 
 </main>
 

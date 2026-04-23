@@ -22,3 +22,7 @@ data/search_index.json
 *.ipynb
 *.tsv
 preprocess.py
+
+# Splash page figures — included in public repo
+!evidence_strength_diverging_final_quantandbinary.png
+!gene_reclassification_stacked_bar\ (9).png
