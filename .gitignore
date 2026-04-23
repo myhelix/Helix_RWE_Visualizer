@@ -23,6 +23,7 @@ data/search_index.json
 *.tsv
 preprocess.py
 
-# Splash page figures — included in public repo
+# Splash page figures and logo — included in public repo
 !evidence_strength_diverging_final_quantandbinary.png
 !gene_reclassification_stacked_bar\ (9).png
+!helix_logo_white.png
