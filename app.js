@@ -581,8 +581,7 @@ function renderPlot(gene, record, params) {
 
   plotContainer.innerHTML = '';
   Plotly.newPlot(plotContainer, traces, layout, {
-    displayModeBar: true,
-    modeBarButtonsToRemove: ['select2d','lasso2d','autoScale2d'],
+    staticPlot: true,
   }).then(() => buildLegend())
     .catch(err => {
       plotContainer.innerHTML = `<div style="padding:24px;color:#c00;font-family:monospace">Plotly error: ${err.message}</div>`;
