@@ -277,6 +277,8 @@ function selectVariant(gene, record) {
   document.getElementById('disp-hgvsc').textContent = record.c || '';
   document.getElementById('disp-genomic').textContent = record.v || '';
   document.getElementById('disp-consequence').textContent = record.csq || '';
+  const txEl = document.getElementById('disp-transcript');
+  if (txEl) txEl.textContent = (geneParams[gene] && geneParams[gene].transcript) ? geneParams[gene].transcript : '';
 
   const rweEl = document.getElementById('disp-rwe');
   rweEl.textContent = record.rwe || '—';
