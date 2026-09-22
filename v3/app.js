@@ -588,6 +588,23 @@ function renderPlot(gene, record, params) {
     const frac = (dataPos - axisXMin) / (axisXMax - axisXMin);
     return PANEL_X_DOMAIN[0] + frac * (PANEL_X_DOMAIN[1] - PANEL_X_DOMAIN[0]);
   };
+  // Does the fixed top-left legend box collide with the forest panel's
+  // "Observed variant" row? Both the legend (x:0.02, top-left anchored)
+  // and the forest labels (via toPaperX below) live in the same paper x
+  // fraction, so the legend's known left-anchored footprint
+  // ([0.02, ~0.32], sized for its widest realistic 3-row content) can be
+  // checked directly against the observed-variant label's paper position.
+  // This happens whenever the observed point sits close to the left/benign
+  // side of a narrow x-axis range -- e.g. an LDLR BVS variant with a tight
+  // range -0.2..1.4 puts "Observed variant" at paper-x~0.17, squarely
+  // under the legend -- vs. a wider range that pushes it past paper-x~0.32
+  // and clears the legend entirely. See conversation with Claude,
+  // 2026-09-22 (two LDLR screenshots, one overlapping one not).
+  const LEGEND_LEFT = 0.02;
+  const LEGEND_RIGHT_ESTIMATE = 0.32;
+  const legendCollides = orProxy != null &&
+    toPaperX(orProxy) > LEGEND_LEFT - 0.04 && toPaperX(orProxy) < LEGEND_RIGHT_ESTIMATE + 0.04;
+
   forestLabels.forEach(fl => {
     annotations.push({ xref: 'paper', yref: 'y3', x: toPaperX(fl.x), y: fl.y, text: fl.text,
       showarrow: false, font: { size: 11.5, color: '#333' }, align: 'center', xanchor: 'center', yanchor: 'bottom' });
@@ -652,8 +669,11 @@ function renderPlot(gene, record, params) {
     shapes,
     annotations,
     showlegend: true,
-    legend: { x: 0.02, y: 0.97, xanchor: 'left', yanchor: 'top',
-              bgcolor: 'rgba(255,255,255,0.85)', bordercolor: '#ddd', borderwidth: 1, font: { size: 11 } },
+    legend: legendCollides
+      ? { x: 0.5, y: 0.97, xanchor: 'center', yanchor: 'top',
+          bgcolor: 'rgba(255,255,255,0.85)', bordercolor: '#ddd', borderwidth: 1, font: { size: 11 } }
+      : { x: 0.02, y: 0.97, xanchor: 'left', yanchor: 'top',
+          bgcolor: 'rgba(255,255,255,0.85)', bordercolor: '#ddd', borderwidth: 1, font: { size: 11 } },
   };
 
   // Downgrade note
