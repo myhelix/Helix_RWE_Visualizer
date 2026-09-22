@@ -588,22 +588,58 @@ function renderPlot(gene, record, params) {
     const frac = (dataPos - axisXMin) / (axisXMax - axisXMin);
     return PANEL_X_DOMAIN[0] + frac * (PANEL_X_DOMAIN[1] - PANEL_X_DOMAIN[0]);
   };
-  // Does the fixed top-left legend box collide with the forest panel's
-  // "Observed variant" row? Both the legend (x:0.02, top-left anchored)
-  // and the forest labels (via toPaperX below) live in the same paper x
-  // fraction, so the legend's known left-anchored footprint
-  // ([0.02, ~0.32], sized for its widest realistic 3-row content) can be
-  // checked directly against the observed-variant label's paper position.
-  // This happens whenever the observed point sits close to the left/benign
-  // side of a narrow x-axis range -- e.g. an LDLR BVS variant with a tight
-  // range -0.2..1.4 puts "Observed variant" at paper-x~0.17, squarely
-  // under the legend -- vs. a wider range that pushes it past paper-x~0.32
-  // and clears the legend entirely. See conversation with Claude,
-  // 2026-09-22 (two LDLR screenshots, one overlapping one not).
-  const LEGEND_LEFT = 0.02;
-  const LEGEND_RIGHT_ESTIMATE = 0.32;
-  const legendCollides = orProxy != null &&
-    toPaperX(orProxy) > LEGEND_LEFT - 0.04 && toPaperX(orProxy) < LEGEND_RIGHT_ESTIMATE + 0.04;
+  // Pick whichever of {left, center, right} the Plotly-native legend
+  // overlaps least with the forest panel's two row labels ("Expected
+  // pathogenic effect", "Observed variant..."). A fixed top-left legend
+  // collided badly whenever a forest label sat near the left side of a
+  // narrow x-axis range -- and a plain point-only check under-caught it
+  // further when the label text itself was long (e.g. "Observed variant
+  // (SE solved for display)"), since the text extends well beyond its
+  // center anchor. So: measure each label's actual rendered text width
+  // (Canvas measureText, not a per-character guess) to get its true
+  // occupied paper-x span, and score all 3 candidate legend positions by
+  // total overlap against those spans. The error bar itself is not
+  // counted -- a thin whisker line passing near the legend is a minor
+  // cosmetic issue, unlike two text labels actually overlapping.
+  // See conversation with Claude, 2026-09-22.
+  const plotWidthPx = Math.max(plotContainer.getBoundingClientRect().width || 0, plotContainer.offsetWidth || 0, 900);
+  // Exact rendered pixel width via Canvas measureText, rather than a rough
+  // per-character guess -- text length in characters is a poor proxy since
+  // it ignores font metrics (e.g. narrow vs wide characters, parens/digits).
+  const _measureCtx = document.createElement('canvas').getContext('2d');
+  const textWidthPaper = (text, fontPx) => {
+    _measureCtx.font = `${fontPx}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+    return _measureCtx.measureText(text).width / plotWidthPx;
+  };
+
+  const labelSpan = (centerPaperX, text) => {
+    const halfTextWidth = textWidthPaper(text, 11.5) / 2;
+    return [centerPaperX - halfTextWidth, centerPaperX + halfTextWidth];
+  };
+
+  const forestSpans = [];
+  forestSpans.push(labelSpan(toPaperX(pathOR), 'Expected pathogenic effect'));
+  if (orProxy != null) {
+    const displayNote = record._display_note === 'solved' ? ' (SE solved for display)'
+      : record._display_note === 'nudged' ? ' (position and SE adjusted for display)' : '';
+    forestSpans.push(labelSpan(toPaperX(orProxy), `Observed variant${displayNote}`));
+  }
+
+  // Legend box width: swatch/line icon + gap + widest entry text + padding,
+  // measured the same way (font size 11, matching the legend's own config).
+  const ICON_AND_PADDING_PAPER = 55 / plotWidthPx;
+  const legendMaxTextWidth = Math.max(
+    textWidthPaper(benignLegend, 11), textWidthPaper(pathLegend, 11), textWidthPaper('Observed Variant', 11));
+  const legendHalfWidth = (ICON_AND_PADDING_PAPER + legendMaxTextWidth) / 2;
+  const legendCandidates = [
+    { x: 0.02, xanchor: 'left',   left: 0.02, right: 0.02 + 2 * legendHalfWidth },
+    { x: 0.5,  xanchor: 'center', left: 0.5 - legendHalfWidth, right: 0.5 + legendHalfWidth },
+    { x: 0.98, xanchor: 'right',  left: 0.98 - 2 * legendHalfWidth, right: 0.98 },
+  ];
+  const overlapAmount = (cand) => forestSpans.reduce((sum, [lo, hi]) =>
+    sum + Math.max(0, Math.min(cand.right, hi) - Math.max(cand.left, lo)), 0);
+  const bestLegendPos = legendCandidates.reduce((best, cand) =>
+    overlapAmount(cand) < overlapAmount(best) - 1e-9 ? cand : best, legendCandidates[0]);
 
   forestLabels.forEach(fl => {
     annotations.push({ xref: 'paper', yref: 'y3', x: toPaperX(fl.x), y: fl.y, text: fl.text,
@@ -669,11 +705,8 @@ function renderPlot(gene, record, params) {
     shapes,
     annotations,
     showlegend: true,
-    legend: legendCollides
-      ? { x: 0.5, y: 0.97, xanchor: 'center', yanchor: 'top',
-          bgcolor: 'rgba(255,255,255,0.85)', bordercolor: '#ddd', borderwidth: 1, font: { size: 11 } }
-      : { x: 0.02, y: 0.97, xanchor: 'left', yanchor: 'top',
-          bgcolor: 'rgba(255,255,255,0.85)', bordercolor: '#ddd', borderwidth: 1, font: { size: 11 } },
+    legend: { x: bestLegendPos.x, y: 0.97, xanchor: bestLegendPos.xanchor, yanchor: 'top',
+              bgcolor: 'rgba(255,255,255,0.85)', bordercolor: '#ddd', borderwidth: 1, font: { size: 11 } },
   };
 
   // Downgrade note
