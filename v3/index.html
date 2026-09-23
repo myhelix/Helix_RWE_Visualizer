@@ -6,10 +6,8 @@
   <title>RWE Visualizer</title>
   <link rel="stylesheet" href="style.css">
   <script src="plotly.min.js" charset="utf-8"></script>
-  <!-- Internal build: full-data config, loads app_v3.js. The public build
-       (deployed separately) is mechanically derived from this file with
-       showFullData flipped to false -- see strip_v3_public_fields.py /
-       the deploy build step. -->
+  <!-- Public build: lean data (data_v3_public), showFullData: false, loads app.js.
+       Mechanically derived from the internal build -- see strip_v3_public_fields.py. -->
   <script>window.APP_CONFIG = { showFullData: false };</script>
   <style>
     /* ---- About section styles ---- */

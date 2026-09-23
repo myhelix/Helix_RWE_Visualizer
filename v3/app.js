@@ -368,7 +368,7 @@ function renderPlot(gene, record, params) {
   const pathORLci  = params.pathOR_lci; // v3: uncertainty in the expected-pathogenic anchor itself
   const pathORUci  = params.pathOR_uci;
   const phenotype = params.phenotype;
-  const { or: orVal, lci, uci, lr, rwe, lim, lrl, lru } = record;
+  const { or: orVal, lci, uci, lr, rwe, lrl, lru, ta } = record;
 
   // Guard: no statistical data at all
   const hasPoint = isQuantitative ? (orVal != null && orVal > -9) : (orVal != null && orVal > 0);
@@ -383,7 +383,7 @@ function renderPlot(gene, record, params) {
 
   try {
 
-  const isDowngraded = (lim === 'sample_size') && !!rwe;
+  const isDowngraded = !!ta && !!rwe;
 
   // SE on the appropriate scale
   let se;
@@ -442,7 +442,25 @@ function renderPlot(gene, record, params) {
     distBenign = xRange.map(x => normalPDF(Math.log(x), 0, se));
     distPath   = xRange.map(x => normalPDF(Math.log(x), Math.log(pathOR), se));
   }
-  const lrCurve = distPath.map((p, i) => Math.max(1e-6, Math.min(1e8, p / distBenign[i])));
+  // FIX (2026-09-23, see conversation with Claude): the color strip used
+  // to derive its LR from distPath[i]/distBenign[i] -- both are Gaussian
+  // pdf() values, which underflow to exactly 0 once |x| is more than
+  // ~38 SEs from a curve's own mean. For tight-SE variants (solved SEs as
+  // small as 0.018-0.06 are common in production) the plotted x-range
+  // legitimately reaches 40-90 SEs out, so BOTH pdfs hit 0 simultaneously,
+  // making the ratio 0/0 = NaN. The Math.max/min clamp below did nothing
+  // for that case (Math.min/max of NaN is NaN in JS), so lrToCategory's
+  // isNaN guard silently painted a spurious gray "neutral" band into the
+  // far tail of the strip where it should have stayed solid BVS/PVS.
+  // Closed-form log-LR has no pdf() call and no exponential until the
+  // very end, so it never underflows to 0/0 -- same formula as
+  // regenerate_v3_binary.py/regenerate_v3_quant.py's solve_se everywhere.
+  const lrCurve = xRange.map(x => {
+    const xv   = isQuantitative ? x : Math.log(x);
+    const muP  = isQuantitative ? pathOR : Math.log(pathOR);
+    const logLR = muP * (2 * xv - muP) / (2 * se * se);
+    return Math.exp(Math.max(-700, Math.min(700, logLR)));
+  });
   const yMax = Math.max(...distBenign, ...distPath) * 1.15;
 
   // Color strip
@@ -502,24 +520,20 @@ function renderPlot(gene, record, params) {
       ? (isQuantitative ? `Observed Effect = ${fmtNum(orProxy)}` : `Observed OR = ${fmtNum(orProxy)}`)
       : `CI midpoint = ${fmtNum(orProxy)} (point est. masked)`;
 
-    if (isDowngraded) {
-      traces.push({ x: [orProxy], y: [0.5], mode: 'markers',
-        marker: { color: '#aaaaaa', size: 12, symbol: 'circle', line: { color: '#555', width: 1.5 } },
-        xaxis: 'x2', yaxis: 'y2', showlegend: false,
-        hovertemplate: `${ptLabel}<br>Raw LR category (downgraded)<extra></extra>`, name: 'Raw position' });
-      const downgradedX = findCategoryCenter(rwe, xRange, lrCurve, pathOR, se, isQuantitative);
-      if (downgradedX != null) {
-        traces.push({ x: [downgradedX], y: [0.5], mode: 'markers',
-          marker: { color: '#111111', size: 12, symbol: 'circle', line: { color: '#111', width: 1.5 } },
-          xaxis: 'x2', yaxis: 'y2', showlegend: false,
-          hovertemplate: `Assigned: ${rwe} (downgraded due to small sample)<extra></extra>`, name: 'Assigned category' });
-      }
-    } else {
-      traces.push({ x: [orProxy], y: [0.5], mode: 'markers',
-        marker: { color: '#111111', size: 12, symbol: 'circle', line: { color: '#111', width: 1.5 } },
-        xaxis: 'x2', yaxis: 'y2', showlegend: false,
-        hovertemplate: `${ptLabel}<br>LR = ${lr != null ? fmtNum(lr) : '—'}<extra></extra>`, name: 'Observed' });
-    }
+    // Single dot always, at the real observed position (never repositioned
+    // to a category center) -- see conversation with Claude, 2026-09-22.
+    // Previously showed two dots for tail-capped/downgraded variants (gray
+    // "raw position" + black "assigned category", the latter moved to
+    // findCategoryCenter); removed the second (moved) dot per explicit
+    // decision, keeping only the real-position dot, now colored black
+    // like the non-downgraded case.
+    const hoverText = isDowngraded
+      ? `${ptLabel}<br>Raw LR category (downgraded due to small sample; assigned: ${rwe})<extra></extra>`
+      : `${ptLabel}<br>LR = ${lr != null ? fmtNum(lr) : '—'}<extra></extra>`;
+    traces.push({ x: [orProxy], y: [0.5], mode: 'markers',
+      marker: { color: '#111111', size: 12, symbol: 'circle', line: { color: '#111', width: 1.5 } },
+      xaxis: 'x2', yaxis: 'y2', showlegend: false,
+      hovertemplate: hoverText, name: 'Observed' });
   }
 
   if (orProxy != null) {
@@ -714,8 +728,8 @@ function renderPlot(gene, record, params) {
   if (isDowngraded) {
     dnNote.textContent =
       `Note: This variant's LR was downgraded from its raw score due to a small sample size. ` +
-      `The gray dot shows where the observed LR falls on the evidence scale; ` +
-      `the black dot shows the assigned (downgraded) category.`;
+      `The dot shows the observed LR's true position on the evidence scale; ` +
+      `the strikethrough category above it shows the raw category before downgrading to the assigned category.`;
     dnNote.classList.remove('hidden');
   } else {
     dnNote.classList.add('hidden');
@@ -755,42 +769,6 @@ function buildColorSegments(orRange, lrValues) {
   }
   if (curCat) segs.push({ cat: curCat, color: curColor, x0, x1: orRange[orRange.length - 1] });
   return segs;
-}
-
-// ---- Find center x position for a category on this variant's LR curve ----
-function findCategoryCenter(catName, xRange, lrValues, pathOR, se, isQuantitative) {
-  const catXs = xRange.filter((_, i) => lrToCategory(lrValues[i]) === catName);
-  if (catXs.length === 0) {
-    // Category not in current range; compute analytically from LR midpoint
-    const bounds = getCategoryLRBounds(catName);
-    const lrMid = Math.sqrt(bounds.lo * (bounds.hi === Infinity ? bounds.lo * 350 : bounds.hi));
-    if (lrMid <= 0) return null;
-    if (isQuantitative) {
-      return Math.log(lrMid) * se ** 2 / pathOR + pathOR / 2;
-    }
-    const logPathOR = Math.log(pathOR);
-    return Math.exp(logPathOR / 2 + Math.log(lrMid) * se ** 2 / logPathOR);
-  }
-  if (isQuantitative) {
-    return catXs.reduce((s, v) => s + v, 0) / catXs.length;
-  }
-  const sumLog = catXs.reduce((s, v) => s + Math.log(v), 0);
-  return Math.exp(sumLog / catXs.length);
-}
-
-function getCategoryLRBounds(cat) {
-  const map = {
-    BVS:     { lo: 0,      hi: 0.0029 },
-    BS:      { lo: 0.0029, hi: 0.053  },
-    BM:      { lo: 0.053,  hi: 0.23   },
-    BP:      { lo: 0.23,   hi: 0.48   },
-    neutral: { lo: 0.48,   hi: 2.08   },
-    PP:      { lo: 2.08,   hi: 4.33   },
-    PM:      { lo: 4.33,   hi: 18.7   },
-    PS:      { lo: 18.7,   hi: 350    },
-    PVS:     { lo: 350,    hi: Infinity },
-  };
-  return map[cat] || { lo: 0.48, hi: 2.08 };
 }
 
 // ---- Evidence legend (below plot) ----
