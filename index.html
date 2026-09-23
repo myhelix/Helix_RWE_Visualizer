@@ -6,7 +6,8 @@
   <title>RWE Visualizer</title>
   <link rel="stylesheet" href="style.css">
   <script src="plotly.min.js" charset="utf-8"></script>
-  <!-- Public version: RWE classification only -->
+  <!-- Public build: lean data (data_v3_public), showFullData: false, loads app.js.
+       Mechanically derived from the internal build -- see strip_v3_public_fields.py. -->
   <script>window.APP_CONFIG = { showFullData: false };</script>
   <style>
     /* ---- About section styles ---- */
@@ -142,6 +143,7 @@
       font-style: italic;
       text-align: left;
     }
+    .figure-wrap.figure-wide { grid-column: 1 / -1; }
 
     /* ---- Citation placeholder ---- */
     .citation-box {
@@ -176,7 +178,7 @@
 <header>
   <img src="helix_logo_white.png" alt="Helix" style="height:36px;display:block;margin-bottom:16px;opacity:0.95">
   <h1>RWE Visualizer</h1>
-  <p>Visualize likelihood ratio evidence for variant classification using real-world electronic health record data</p>
+  <p>Visualize likelihood ratio evidence — with 95% confidence intervals — for variant classification using real-world electronic health record data</p>
 </header>
 
 <main>
@@ -225,18 +227,26 @@
           <span class="class-label">RWE Classification</span>
           <span id="disp-rwe" class="class-badge"></span>
         </div>
+        <div class="class-item">
+          <span class="class-label">Likelihood Ratio</span>
+          <span id="disp-lr" class="class-badge"></span>
+        </div>
         <!-- Full-data fields: hidden on public page, visible on internal page -->
+        <div class="class-item full-data-only" style="display:none">
+          <span class="class-label">ClinVar</span>
+          <span id="disp-cv" class="class-badge"></span>
+        </div>
+        <div class="class-item full-data-only" style="display:none">
+          <span class="class-label">ACMG Points pre RWE</span>
+          <span id="disp-ap" class="class-badge"></span>
+        </div>
+        <div class="class-item full-data-only" style="display:none">
+          <span class="class-label">Starting Category</span>
+          <span id="disp-ec" class="class-badge"></span>
+        </div>
         <div class="class-item full-data-only" style="display:none">
           <span class="class-label">New Category</span>
           <span id="disp-nc" class="class-badge"></span>
-        </div>
-        <div class="class-item full-data-only" style="display:none">
-          <span class="class-label">ClinVar</span>
-          <span id="disp-cv" class="class-value"></span>
-        </div>
-        <div class="class-item">
-          <span class="class-label">Likelihood Ratio</span>
-          <span id="disp-lr" class="class-value"></span>
         </div>
       </div>
     </div>
@@ -272,13 +282,15 @@
       association with its disease phenotype is translated into a calibrated ACMG/AMP evidence category —
       from BVS through BP for benign-supporting, and PP through PVS for pathogenic-supporting evidence.
       Evidence can be combined with other variant-level criteria to support classification or reclassification.
+      Likelihood ratios are reported with 95% confidence intervals, and genes whose own gene-level pathogenic-effect
+      estimate has an unreliable confidence interval are excluded from this resource.
     </p>
   </div>
 
   <!-- Stats -->
   <div class="stats-row">
     <div class="stat-card">
-      <div class="stat-number">36</div>
+      <div class="stat-number">28</div>
       <div class="stat-label">Genes</div>
     </div>
     <div class="stat-card">
@@ -286,7 +298,7 @@
       <div class="stat-label">Disease Phenotypes</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number">~143K</div>
+      <div class="stat-number">~135K</div>
       <div class="stat-label">Variants with Evidence</div>
     </div>
     <div class="stat-card">
@@ -314,7 +326,6 @@
           <li>CHEK2</li>
           <li>NF1</li>
           <li>PALB2</li>
-          <li>PTEN</li>
           <li>RAD51C</li>
           <li>RAD51D</li>
           <li>TP53</li>
@@ -334,16 +345,11 @@
       <div class="phenotype-col">
         <div class="phenotype-name">Cardiomyopathy</div>
         <ul class="gene-list">
-          <li>BAG3</li>
-          <li>BRAF</li>
           <li>DSP</li>
           <li>FLNC</li>
           <li>LMNA</li>
           <li>PKP2</li>
-          <li>PLN</li>
-          <li>RBM20</li>
           <li>SCN5A</li>
-          <li>TNNI3K</li>
           <li>TNNT2</li>
           <li>TTN</li>
           <li>TTR</li>
@@ -355,8 +361,6 @@
         <ul class="gene-list">
           <li>MYBPC3</li>
           <li>MYH7</li>
-          <li>MYL2</li>
-          <li>TNNI3</li>
         </ul>
       </div>
 
@@ -377,13 +381,25 @@
     <h3>Performance</h3>
     <p class="card-desc">
       RWE categories are concordant with existing variant classifications and resolve a substantial fraction
-      of the VUS carrier burden across all 36 genes.
+      of the VUS carrier burden across all 28 genes.
     </p>
     <div class="figures-row">
 
+      <div class="figure-wrap figure-wide">
+        <img
+          src="figure1b_flowchart_axis_nameless.png"
+          alt="Diagram illustrating the likelihood-ratio evidence framework: observed effect size relative to the benign and pathogenic reference distributions"
+        >
+        <p class="figure-caption">
+          The likelihood-ratio evidence framework. An observed variant's effect (carrier frequency in
+          cases vs. controls) is compared against the benign (null) and pathogenic reference distributions
+          for its gene; the resulting likelihood ratio maps onto a calibrated ACMG/AMP evidence category.
+        </p>
+      </div>
+
       <div class="figure-wrap">
         <img
-          src="evidence_strength_diverging_final_quantandbinary.png"
+          src="evidence_strength_diverging_v3.png"
           alt="Diverging bar chart showing percent of variants with benign- or pathogenic-supporting RWE, stratified by pre-RWE ACMG Points and ClinVar classification"
         >
         <p class="figure-caption">
@@ -395,12 +411,12 @@
 
       <div class="figure-wrap">
         <img
-          src="gene_reclassification_stacked_bar%20(9).png"
+          src="gene_reclassification_stacked_bar_v3.png"
           alt="Stacked bar chart showing the percent of VUS carriers reclassified per gene"
         >
         <p class="figure-caption">
-          Proportion of individuals carrying a VUS who receive an actionable reclassification
-          (to B/LB or P/LP) based on RWE, per gene.
+          Proportion of individuals carrying a VUS, split by whether they receive an actionable
+          reclassification (to B/LB or P/LP) based on RWE, per gene.
         </p>
       </div>
 

@@ -1,38 +1,254 @@
 {
-  "ATM":    { "phenotype": "Breast or Ovarian Cancer", "pathOR": 2.88825, "phefreq": 0.057693, "type": "binary", "transcript": "NM_000051" },
-  "BARD1":  { "phenotype": "Breast or Ovarian Cancer", "pathOR": 2.97648, "phefreq": 0.057693, "type": "binary", "transcript": "NM_000465" },
-  "CDH1":   { "phenotype": "Breast or Ovarian Cancer", "pathOR": 7.30922, "phefreq": 0.057693, "type": "binary", "transcript": "NM_004360" },
-  "CHEK2":  { "phenotype": "Breast or Ovarian Cancer", "pathOR": 2.38036, "phefreq": 0.057693, "type": "binary", "transcript": "NM_007194" },
-  "NF1":    { "phenotype": "Breast or Ovarian Cancer", "pathOR": 2.63454, "phefreq": 0.057693, "type": "binary", "transcript": "NM_001042492" },
-  "PALB2":  { "phenotype": "Breast or Ovarian Cancer", "pathOR": 3.88587, "phefreq": 0.057693, "type": "binary", "transcript": "NM_024675 / NM_001407296" },
-  "PTEN":   { "phenotype": "Breast or Ovarian Cancer", "pathOR": 5.00503, "phefreq": 0.057693, "type": "binary", "transcript": "NM_000314" },
-  "RAD51C": { "phenotype": "Breast or Ovarian Cancer", "pathOR": 2.31423, "phefreq": 0.057693, "type": "binary", "transcript": "NM_058216" },
-  "RAD51D": { "phenotype": "Breast or Ovarian Cancer", "pathOR": 2.28705, "phefreq": 0.057693, "type": "binary", "transcript": "NM_002878" },
-  "TP53":   { "phenotype": "Breast or Ovarian Cancer", "pathOR": 4.62947, "phefreq": 0.057693, "type": "binary", "transcript": "NM_000546" },
-  "BRCA1":  { "phenotype": "Breast or Ovarian Cancer", "pathOR": 12.1291, "phefreq": 0.057693, "type": "binary", "transcript": "NM_007294 / NM_001407969" },
-  "BRCA2":  { "phenotype": "Breast or Ovarian Cancer", "pathOR": 6.80591, "phefreq": 0.057693, "type": "binary", "transcript": "NM_000059 / NM_001406721" },
-  "MLH1":   { "phenotype": "Colorectal or Endometrial Cancer (Lynch)", "pathOR": 51.1047, "phefreq": 0.0135362460106592, "type": "binary", "transcript": "NM_000249" },
-  "MSH2":   { "phenotype": "Colorectal or Endometrial Cancer (Lynch)", "pathOR": 31.583, "phefreq": 0.0135362460106592, "type": "binary", "transcript": "NM_000251 / NM_001406655" },
-  "MSH6":   { "phenotype": "Colorectal or Endometrial Cancer (Lynch)", "pathOR": 12.884, "phefreq": 0.0135362460106592, "type": "binary", "transcript": "NM_000179 / NM_001406813" },
-  "PMS2":   { "phenotype": "Colorectal or Endometrial Cancer (Lynch)", "pathOR": 1.72278, "phefreq": 0.0135362460106592, "type": "binary", "transcript": "NM_000535 / NM_001406872" },
-  "BAG3":   { "phenotype": "Cardiomyopathy", "pathOR": 12.0677, "phefreq": 0.0305547296368408, "type": "binary", "transcript": "NM_004281" },
-  "BRAF":   { "phenotype": "Cardiomyopathy", "pathOR": 20.7032, "phefreq": 0.0305547296368408, "type": "binary", "transcript": "NM_004333 / NM_001378474" },
-  "DSP":    { "phenotype": "Cardiomyopathy", "pathOR": 5.94257, "phefreq": 0.0305547296368408, "type": "binary", "transcript": "NM_004415" },
-  "FLNC":   { "phenotype": "Cardiomyopathy", "pathOR": 6.45699, "phefreq": 0.0305547296368408, "type": "binary", "transcript": "NM_001458" },
-  "LMNA":   { "phenotype": "Cardiomyopathy", "pathOR": 16.6282, "phefreq": 0.0305547296368408, "type": "binary", "transcript": "NM_170707 / NM_001406991" },
-  "PKP2":   { "phenotype": "Cardiomyopathy", "pathOR": 3.90242, "phefreq": 0.0305547296368408, "type": "binary", "transcript": "NM_001005242 / NM_001407159" },
-  "PLN":    { "phenotype": "Cardiomyopathy", "pathOR": 8.93122, "phefreq": 0.0305547296368408, "type": "binary", "transcript": "NM_002667" },
-  "RBM20":  { "phenotype": "Cardiomyopathy", "pathOR": 109.205, "phefreq": 0.0305547296368408, "type": "binary", "transcript": "NM_001134363" },
-  "SCN5A":  { "phenotype": "Cardiomyopathy", "pathOR": 3.76066, "phefreq": 0.0305547296368408, "type": "binary", "transcript": "NM_000335" },
-  "TNNI3K": { "phenotype": "Cardiomyopathy", "pathOR": 10.7734, "phefreq": 0.0305547296368408, "type": "binary", "transcript": "NM_015978" },
-  "TNNT2":  { "phenotype": "Cardiomyopathy", "pathOR": 30.6518, "phefreq": 0.0305547296368408, "type": "binary", "transcript": "NM_001276345" },
-  "TTN":    { "phenotype": "Cardiomyopathy", "pathOR": 7.10413, "phefreq": 0.0305547296368408, "type": "binary", "transcript": "NM_001267550" },
-  "TTR":    { "phenotype": "Cardiomyopathy", "pathOR": 2.65249, "phefreq": 0.0305547296368408, "type": "binary", "transcript": "NM_000371" },
-  "MYBPC3": { "phenotype": "HCM", "pathOR": 25.709, "phefreq": 0.0050824732624489, "type": "binary", "transcript": "NM_000256" },
-  "MYH7":   { "phenotype": "HCM", "pathOR": 27.4344, "phefreq": 0.0050824732624489, "type": "binary", "transcript": "NM_000257" },
-  "MYL2":   { "phenotype": "HCM", "pathOR": 59.9276, "phefreq": 0.0050824732624489, "type": "binary", "transcript": "NM_000432" },
-  "TNNI3":  { "phenotype": "HCM", "pathOR": 10.2958, "phefreq": 0.0050824732624489, "type": "binary", "transcript": "NM_000363" },
-  "APOB":   { "phenotype": "LDL Cholesterol", "pathOR": 1.0, "phefreq": null, "type": "quantitative", "transcript": "NM_000384" },
-  "LDLR":   { "phenotype": "LDL Cholesterol", "pathOR": 1.0, "phefreq": null, "type": "quantitative", "transcript": "NM_000527" },
-  "PCSK9":  { "phenotype": "LDL Cholesterol", "pathOR": 1.0, "phefreq": null, "type": "quantitative", "transcript": "NM_174936 / NM_001407247" }
+ "ATM": {
+  "phenotype": "Breast or Ovarian Cancer",
+  "phefreq": 0.057693,
+  "type": "binary",
+  "transcript": "NM_000051",
+  "pathOR": 2.345051,
+  "pathOR_lci": 2.090606,
+  "pathOR_uci": 2.630466
+ },
+ "BARD1": {
+  "phenotype": "Breast or Ovarian Cancer",
+  "phefreq": 0.057693,
+  "type": "binary",
+  "transcript": "NM_000465",
+  "pathOR": 3.088426,
+  "pathOR_lci": 2.427852,
+  "pathOR_uci": 3.92873
+ },
+ "CDH1": {
+  "phenotype": "Breast or Ovarian Cancer",
+  "phefreq": 0.057693,
+  "type": "binary",
+  "transcript": "NM_004360",
+  "pathOR": 3.39866,
+  "pathOR_lci": 1.933472,
+  "pathOR_uci": 5.97417
+ },
+ "CHEK2": {
+  "phenotype": "Breast or Ovarian Cancer",
+  "phefreq": 0.057693,
+  "type": "binary",
+  "transcript": "NM_007194",
+  "pathOR": 2.283414,
+  "pathOR_lci": 2.083128,
+  "pathOR_uci": 2.502958
+ },
+ "NF1": {
+  "phenotype": "Breast or Ovarian Cancer",
+  "phefreq": 0.057693,
+  "type": "binary",
+  "transcript": "NM_001042492",
+  "pathOR": 1.733929,
+  "pathOR_lci": 1.248464,
+  "pathOR_uci": 2.408167
+ },
+ "PALB2": {
+  "phenotype": "Breast or Ovarian Cancer",
+  "phefreq": 0.057693,
+  "type": "binary",
+  "transcript": "NM_024675 / NM_001407296",
+  "pathOR": 3.932104,
+  "pathOR_lci": 3.359624,
+  "pathOR_uci": 4.602133
+ },
+ "RAD51C": {
+  "phenotype": "Breast or Ovarian Cancer",
+  "phefreq": 0.057693,
+  "type": "binary",
+  "transcript": "NM_058216",
+  "pathOR": 2.216484,
+  "pathOR_lci": 1.56277,
+  "pathOR_uci": 3.14365
+ },
+ "RAD51D": {
+  "phenotype": "Breast or Ovarian Cancer",
+  "phefreq": 0.057693,
+  "type": "binary",
+  "transcript": "NM_002878",
+  "pathOR": 1.961683,
+  "pathOR_lci": 1.346551,
+  "pathOR_uci": 2.857821
+ },
+ "TP53": {
+  "phenotype": "Breast or Ovarian Cancer",
+  "phefreq": 0.057693,
+  "type": "binary",
+  "transcript": "NM_000546",
+  "pathOR": 2.522953,
+  "pathOR_lci": 1.712429,
+  "pathOR_uci": 3.717112
+ },
+ "BRCA1": {
+  "phenotype": "Breast or Ovarian Cancer",
+  "phefreq": 0.057693,
+  "type": "binary",
+  "transcript": "NM_007294 / NM_001407969",
+  "pathOR": 11.201078,
+  "pathOR_lci": 9.805374,
+  "pathOR_uci": 12.795447
+ },
+ "BRCA2": {
+  "phenotype": "Breast or Ovarian Cancer",
+  "phefreq": 0.057693,
+  "type": "binary",
+  "transcript": "NM_000059 / NM_001406721",
+  "pathOR": 5.993082,
+  "pathOR_lci": 5.446448,
+  "pathOR_uci": 6.594579
+ },
+ "MLH1": {
+  "phenotype": "Colorectal or Endometrial Cancer (Lynch)",
+  "phefreq": 0.0135362460106592,
+  "type": "binary",
+  "transcript": "NM_000249",
+  "pathOR": 17.127395,
+  "pathOR_lci": 13.008518,
+  "pathOR_uci": 22.55043
+ },
+ "MSH2": {
+  "phenotype": "Colorectal or Endometrial Cancer (Lynch)",
+  "phefreq": 0.0135362460106592,
+  "type": "binary",
+  "transcript": "NM_000251 / NM_001406655",
+  "pathOR": 24.376085,
+  "pathOR_lci": 17.672981,
+  "pathOR_uci": 33.621579
+ },
+ "MSH6": {
+  "phenotype": "Colorectal or Endometrial Cancer (Lynch)",
+  "phefreq": 0.0135362460106592,
+  "type": "binary",
+  "transcript": "NM_000179 / NM_001406813",
+  "pathOR": 10.018496,
+  "pathOR_lci": 8.530606,
+  "pathOR_uci": 11.765901
+ },
+ "PMS2": {
+  "phenotype": "Colorectal or Endometrial Cancer (Lynch)",
+  "phefreq": 0.0135362460106592,
+  "type": "binary",
+  "transcript": "NM_000535 / NM_001406872",
+  "pathOR": 2.432739,
+  "pathOR_lci": 2.006763,
+  "pathOR_uci": 2.949137
+ },
+ "DSP": {
+  "phenotype": "Cardiomyopathy",
+  "phefreq": 0.0305547296368408,
+  "type": "binary",
+  "transcript": "NM_004415",
+  "pathOR": 5.331826,
+  "pathOR_lci": 3.968646,
+  "pathOR_uci": 7.163241
+ },
+ "FLNC": {
+  "phenotype": "Cardiomyopathy",
+  "phefreq": 0.0305547296368408,
+  "type": "binary",
+  "transcript": "NM_001458",
+  "pathOR": 4.156459,
+  "pathOR_lci": 2.70072,
+  "pathOR_uci": 6.396869
+ },
+ "LMNA": {
+  "phenotype": "Cardiomyopathy",
+  "phefreq": 0.0305547296368408,
+  "type": "binary",
+  "transcript": "NM_170707 / NM_001406991",
+  "pathOR": 6.707322,
+  "pathOR_lci": 3.859043,
+  "pathOR_uci": 11.657855
+ },
+ "PKP2": {
+  "phenotype": "Cardiomyopathy",
+  "phefreq": 0.0305547296368408,
+  "type": "binary",
+  "transcript": "NM_001005242 / NM_001407159",
+  "pathOR": 3.227421,
+  "pathOR_lci": 2.460723,
+  "pathOR_uci": 4.233004
+ },
+ "SCN5A": {
+  "phenotype": "Cardiomyopathy",
+  "phefreq": 0.0305547296368408,
+  "type": "binary",
+  "transcript": "NM_000335",
+  "pathOR": 2.213107,
+  "pathOR_lci": 1.514221,
+  "pathOR_uci": 3.234562
+ },
+ "TNNT2": {
+  "phenotype": "Cardiomyopathy",
+  "phefreq": 0.0305547296368408,
+  "type": "binary",
+  "transcript": "NM_001276345",
+  "pathOR": 21.925197,
+  "pathOR_lci": 12.332172,
+  "pathOR_uci": 38.980501
+ },
+ "TTN": {
+  "phenotype": "Cardiomyopathy",
+  "phefreq": 0.0305547296368408,
+  "type": "binary",
+  "transcript": "NM_001267550",
+  "pathOR": 4.767634,
+  "pathOR_lci": 3.820912,
+  "pathOR_uci": 5.948928
+ },
+ "TTR": {
+  "phenotype": "Cardiomyopathy",
+  "phefreq": 0.0305547296368408,
+  "type": "binary",
+  "transcript": "NM_000371",
+  "pathOR": 4.088238,
+  "pathOR_lci": 2.543787,
+  "pathOR_uci": 6.570397
+ },
+ "MYBPC3": {
+  "phenotype": "HCM",
+  "phefreq": 0.0050824732624489,
+  "type": "binary",
+  "transcript": "NM_000256",
+  "pathOR": 30.94997,
+  "pathOR_lci": 25.818925,
+  "pathOR_uci": 37.100716
+ },
+ "MYH7": {
+  "phenotype": "HCM",
+  "phefreq": 0.0050824732624489,
+  "type": "binary",
+  "transcript": "NM_000257",
+  "pathOR": 29.657891,
+  "pathOR_lci": 23.196034,
+  "pathOR_uci": 37.919866
+ },
+ "APOB": {
+  "phenotype": "LDL Cholesterol",
+  "phefreq": null,
+  "type": "quantitative",
+  "transcript": "NM_000384",
+  "pathOR": 1.079178,
+  "pathOR_lci": 0.511017,
+  "pathOR_uci": 1.647339
+ },
+ "LDLR": {
+  "phenotype": "LDL Cholesterol",
+  "phefreq": null,
+  "type": "quantitative",
+  "transcript": "NM_000527",
+  "pathOR": 1.278068,
+  "pathOR_lci": 1.190506,
+  "pathOR_uci": 1.36563
+ },
+ "PCSK9": {
+  "phenotype": "LDL Cholesterol",
+  "phefreq": null,
+  "type": "quantitative",
+  "transcript": "NM_174936 / NM_001407247",
+  "pathOR": 1.040791,
+  "pathOR_lci": 0.089208,
+  "pathOR_uci": 1.992375
+ }
 }
