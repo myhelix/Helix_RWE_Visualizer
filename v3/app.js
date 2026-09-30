@@ -455,16 +455,51 @@ function renderPlot(gene, record, params) {
   // Closed-form log-LR has no pdf() call and no exponential until the
   // very end, so it never underflows to 0/0 -- same formula as
   // regenerate_v3_binary.py/regenerate_v3_quant.py's solve_se everywhere.
+  const muP = isQuantitative ? pathOR : Math.log(pathOR);
   const lrCurve = xRange.map(x => {
     const xv   = isQuantitative ? x : Math.log(x);
-    const muP  = isQuantitative ? pathOR : Math.log(pathOR);
     const logLR = muP * (2 * xv - muP) / (2 * se * se);
     return Math.exp(Math.max(-700, Math.min(700, logLR)));
   });
   const yMax = Math.max(...distBenign, ...distPath) * 1.15;
 
-  // Color strip
-  const stripSegments = buildColorSegments(xRange, lrCurve);
+  // Color strip. Quant only: when record.cb (cap breakpoints, derived
+  // server-side from the REAL aggregate SE/df -- see compute_cap_breaks
+  // in regenerate_v3_quant.py, 2026-09-29) is present, sweep the real
+  // tail-cap ceiling across the strip instead of just the raw LR
+  // category -- no carrier counts or SE are sent to the client, only
+  // these already-derived x/category breakpoints. Binary has no `cb`
+  // field (its real tail-cap is a discrete per-stratum Poisson-binomial
+  // test, not reconstructable from anything sent to the browser -- see
+  // the rejected-port note below), so it keeps the raw-LR-only strip
+  // with just the single point-patch highlight, as before.
+  const stripCats = isQuantitative && record.cb && record.cb.length
+    ? xRange.map((x, i) => applyCapBreaks(x, lrToCategory(lrCurve[i]), record.cb))
+    : xRange.map((x, i) => lrToCategory(lrCurve[i]));
+  const stripSegments = buildColorSegmentsFromCats(xRange, stripCats);
+  // FIX (2026-09-25, see conversation with Claude): tried porting
+  // render_v3_website.py's per-position graduated_cap(cat, fit_fn(xv,cat))
+  // strip coloring here first -- REJECTED after direct verification: its
+  // fit_fn is a normal-CDF approximation keyed to the aggregate display SE,
+  // but the REAL tail-cap safeguard (stratified_tailcap in
+  // regenerate_v3_binary.py/regenerate_v3_quant.py) is a Poisson-binomial
+  // test over the actual per-stratum case/control carrier counts -- data
+  // that isn't in the lean per-variant JSON served to the browser at all.
+  // Tested directly against chr2:47476404:A:G (MSH2): the real answer is
+  // BS (record.rwe), but the ported normal-CDF approximation gave p_favor
+  // ~1.5e-7 -> 'neutral', off by many orders of magnitude -- expected,
+  // since this variant escalates every one of its 6 contributing strata to
+  // the exact-binomial branch (very sparse carriers), where a
+  // continuous/magnitude-based normal approximation and a discrete
+  // count-based Poisson-binomial test diverge badly. render_v3_website.py
+  // itself only gets this right when its CALLER passes in externally
+  // pre-calibrated se_benign/se_pathogenic (computed FROM the real
+  // stratified test) -- it's not a self-contained reconstruction, so it
+  // can't be ported as a generic per-position function. Since record.rwe/
+  // record.ta are already the correct, backend-computed answer, the
+  // strip instead gets a dedicated highlight AT the observed position
+  // (below, near the dot trace) using that known-correct category,
+  // instead of an unreliable client-side re-derivation.
 
   // ---- Traces ----
   const traces = [];
@@ -489,6 +524,24 @@ function renderPlot(gene, record, params) {
       xaxis: 'x2', yaxis: 'y2', showlegend: false, hoverinfo: 'text', text: seg.cat, name: seg.cat });
   });
 
+  // Highlight the observed variant's TRUE assigned category directly on
+  // the strip when the tail-cap safeguard downgraded it. The strip above
+  // only shows the RAW LR-implied category at every position (see note
+  // above) -- for a capped variant the dot sits deep inside a
+  // stronger-looking color band with no visual sign the safeguard
+  // applied. Drawn as a narrow band centered on the dot's own x-position,
+  // in record.rwe's (the known-correct, backend-computed) color, layered
+  // above the raw strip and below the dot itself.
+  if (isDowngraded && orProxy != null) {
+    const halfWidth = 0.03 * (axisXMax - axisXMin);
+    const capX0 = isQuantitative ? orProxy - halfWidth : Math.exp(Math.log(orProxy) - halfWidth);
+    const capX1 = isQuantitative ? orProxy + halfWidth : Math.exp(Math.log(orProxy) + halfWidth);
+    traces.push({ x: [capX0, capX0, capX1, capX1, capX0], y: [0, 1, 1, 0, 0],
+      fill: 'toself', fillcolor: COLORS[rwe], mode: 'lines',
+      line: { width: 1.5, color: '#111' }, xaxis: 'x2', yaxis: 'y2', showlegend: false,
+      hoverinfo: 'text', text: `Assigned category (after tail-cap): ${rwe}`, name: 'Assigned category' });
+  }
+
   // ---- Forest panel (top): gene anchor + observed variant, dot + 95% CI ----
   const forestLabels = [];
   const pathORCIValidFP = pathORLci != null && pathORUci != null && pathORUci > pathORLci;
@@ -511,7 +564,8 @@ function renderPlot(gene, record, params) {
       xaxis: 'x3', yaxis: 'y3', showlegend: false, hoverinfo: 'skip', name: 'Observed variant',
     });
     const displayNote = record._display_note === 'solved' ? ' (SE solved for display)'
-      : record._display_note === 'nudged' ? ' (position and SE adjusted for display)' : '';
+      : record._display_note === 'nudged' ? ' (position and SE adjusted for display)'
+      : record._display_note === 'joint' ? ' (position and SE jointly solved for real LR + tail-cap)' : '';
     forestLabels.push({ x: orProxy, y: 1.35, text: `Observed variant${displayNote}` });
   }
 
@@ -635,7 +689,8 @@ function renderPlot(gene, record, params) {
   forestSpans.push(labelSpan(toPaperX(pathOR), 'Expected pathogenic effect'));
   if (orProxy != null) {
     const displayNote = record._display_note === 'solved' ? ' (SE solved for display)'
-      : record._display_note === 'nudged' ? ' (position and SE adjusted for display)' : '';
+      : record._display_note === 'nudged' ? ' (position and SE adjusted for display)'
+      : record._display_note === 'joint' ? ' (position and SE jointly solved for real LR + tail-cap)' : '';
     forestSpans.push(labelSpan(toPaperX(orProxy), `Observed variant${displayNote}`));
   }
 
@@ -753,11 +808,15 @@ function renderPlot(gene, record, params) {
 
 // ---- Color strip helper ----
 function buildColorSegments(orRange, lrValues) {
+  return buildColorSegmentsFromCats(orRange, orRange.map((_, i) => lrToCategory(lrValues[i])));
+}
+
+function buildColorSegmentsFromCats(orRange, cats) {
   const segs = [];
   let curCat = null, curColor = null, x0 = orRange[0];
 
   for (let i = 0; i < orRange.length; i++) {
-    const cat = lrToCategory(lrValues[i]);
+    const cat = cats[i];
     if (cat !== curCat) {
       if (curCat !== null) {
         segs.push({ cat: curCat, color: COLORS[curCat], x0, x1: orRange[i] });
@@ -769,6 +828,26 @@ function buildColorSegments(orRange, lrValues) {
   }
   if (curCat) segs.push({ cat: curCat, color: curColor, x0, x1: orRange[orRange.length - 1] });
   return segs;
+}
+
+// Quant-only: the real aggregate tail-cap ceiling active at x, from the
+// server-derived record.cb breakpoints (2026-09-29, see
+// regenerate_v3_quant.py's compute_cap_breaks). graduated_cap can only
+// ever downgrade a category, so combining the raw category with the
+// ceiling is just "move toward neutral, never past it, never away from
+// it" on whichever side the raw category is on.
+function applyCapBreaks(x, rawCat, capBreaks) {
+  let ceiling = capBreaks[0][1];
+  for (const pair of capBreaks) {
+    if (pair[0] <= x) ceiling = pair[1]; else break;
+  }
+  const rawRank = CATEGORIES.indexOf(rawCat) - 4;
+  const ceilRank = CATEGORIES.indexOf(ceiling) - 4;
+  let effRank;
+  if (rawRank === 0) effRank = 0;
+  else if (rawRank < 0) effRank = Math.max(rawRank, ceilRank);
+  else effRank = Math.min(rawRank, ceilRank);
+  return CATEGORIES[effRank + 4];
 }
 
 // ---- Evidence legend (below plot) ----
