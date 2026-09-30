@@ -463,43 +463,27 @@ function renderPlot(gene, record, params) {
   });
   const yMax = Math.max(...distBenign, ...distPath) * 1.15;
 
-  // Color strip. Quant only: when record.cb (cap breakpoints, derived
-  // server-side from the REAL aggregate SE/df -- see compute_cap_breaks
-  // in regenerate_v3_quant.py, 2026-09-29) is present, sweep the real
-  // tail-cap ceiling across the strip instead of just the raw LR
-  // category -- no carrier counts or SE are sent to the client, only
-  // these already-derived x/category breakpoints. Binary has no `cb`
-  // field (its real tail-cap is a discrete per-stratum Poisson-binomial
-  // test, not reconstructable from anything sent to the browser -- see
-  // the rejected-port note below), so it keeps the raw-LR-only strip
-  // with just the single point-patch highlight, as before.
-  const stripCats = isQuantitative && record.cb && record.cb.length
+  // Color strip: sweep the REAL tail-cap ceiling across the strip using
+  // record.cb (cap breakpoints), instead of just the raw LR category.
+  // FIX (2026-09-29, per Liz): earlier version only did this for quant
+  // and fell back to a raw-LR-only strip + a single highlight patch at
+  // the observed x for binary. A first binary attempt derived
+  // breakpoints from the discrete per-stratum counts converted to a
+  // separate "naive OR" x-scale, but that didn't generally land on the
+  // same coordinate system as the plotted dot (confirmed concretely on
+  // MSH2 chr2:47476404:A:G). Corrected same day, per Liz: the plotted
+  // point's own se (from solve_joint, or whichever cascade branch fired)
+  // is ALREADY solved so a normal model at that se reproduces the real
+  // discrete tail-cap p_fit exactly at the dot -- so
+  // binary_compute_cap_breaks (regenerate_v3_binary.py) now sweeps that
+  // SAME normal model/se across x for the 10%/1%/0.1%/0.01% crossings,
+  // guaranteeing the strip and the dot agree by construction. No raw
+  // counts or per-stratum data are sent to the client either way -- just
+  // these already-derived x/category breakpoints, for both traits now.
+  const stripCats = record.cb && record.cb.length
     ? xRange.map((x, i) => applyCapBreaks(x, lrToCategory(lrCurve[i]), record.cb))
     : xRange.map((x, i) => lrToCategory(lrCurve[i]));
   const stripSegments = buildColorSegmentsFromCats(xRange, stripCats);
-  // FIX (2026-09-25, see conversation with Claude): tried porting
-  // render_v3_website.py's per-position graduated_cap(cat, fit_fn(xv,cat))
-  // strip coloring here first -- REJECTED after direct verification: its
-  // fit_fn is a normal-CDF approximation keyed to the aggregate display SE,
-  // but the REAL tail-cap safeguard (stratified_tailcap in
-  // regenerate_v3_binary.py/regenerate_v3_quant.py) is a Poisson-binomial
-  // test over the actual per-stratum case/control carrier counts -- data
-  // that isn't in the lean per-variant JSON served to the browser at all.
-  // Tested directly against chr2:47476404:A:G (MSH2): the real answer is
-  // BS (record.rwe), but the ported normal-CDF approximation gave p_favor
-  // ~1.5e-7 -> 'neutral', off by many orders of magnitude -- expected,
-  // since this variant escalates every one of its 6 contributing strata to
-  // the exact-binomial branch (very sparse carriers), where a
-  // continuous/magnitude-based normal approximation and a discrete
-  // count-based Poisson-binomial test diverge badly. render_v3_website.py
-  // itself only gets this right when its CALLER passes in externally
-  // pre-calibrated se_benign/se_pathogenic (computed FROM the real
-  // stratified test) -- it's not a self-contained reconstruction, so it
-  // can't be ported as a generic per-position function. Since record.rwe/
-  // record.ta are already the correct, backend-computed answer, the
-  // strip instead gets a dedicated highlight AT the observed position
-  // (below, near the dot trace) using that known-correct category,
-  // instead of an unreliable client-side re-derivation.
 
   // ---- Traces ----
   const traces = [];
@@ -524,23 +508,13 @@ function renderPlot(gene, record, params) {
       xaxis: 'x2', yaxis: 'y2', showlegend: false, hoverinfo: 'text', text: seg.cat, name: seg.cat });
   });
 
-  // Highlight the observed variant's TRUE assigned category directly on
-  // the strip when the tail-cap safeguard downgraded it. The strip above
-  // only shows the RAW LR-implied category at every position (see note
-  // above) -- for a capped variant the dot sits deep inside a
-  // stronger-looking color band with no visual sign the safeguard
-  // applied. Drawn as a narrow band centered on the dot's own x-position,
-  // in record.rwe's (the known-correct, backend-computed) color, layered
-  // above the raw strip and below the dot itself.
-  if (isDowngraded && orProxy != null) {
-    const halfWidth = 0.03 * (axisXMax - axisXMin);
-    const capX0 = isQuantitative ? orProxy - halfWidth : Math.exp(Math.log(orProxy) - halfWidth);
-    const capX1 = isQuantitative ? orProxy + halfWidth : Math.exp(Math.log(orProxy) + halfWidth);
-    traces.push({ x: [capX0, capX0, capX1, capX1, capX0], y: [0, 1, 1, 0, 0],
-      fill: 'toself', fillcolor: COLORS[rwe], mode: 'lines',
-      line: { width: 1.5, color: '#111' }, xaxis: 'x2', yaxis: 'y2', showlegend: false,
-      hoverinfo: 'text', text: `Assigned category (after tail-cap): ${rwe}`, name: 'Assigned category' });
-  }
+  // FIX (2026-09-29, per Liz): removed the old single-point highlight
+  // patch here -- now that the strip itself (above) sweeps the REAL
+  // tail-cap ceiling for both traits, the dot's own position is already
+  // correctly colored by record.rwe's actual category; a separate patch
+  // marking "the real answer" at just that one point is redundant (and
+  // was the wrong design in the first place -- it doesn't show WHERE the
+  // real thresholds are, just a fixed-width box at one point).
 
   // ---- Forest panel (top): gene anchor + observed variant, dot + 95% CI ----
   const forestLabels = [];
