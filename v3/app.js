@@ -150,6 +150,41 @@ async function init() {
     filterRow.appendChild(btn);
   });
   document.querySelector('.search-section').appendChild(filterRow);
+
+  await applyLinkFromURL();
+
+  // FIX (2026-10-02, per Liz: "if the page has already loaded, the
+  // second time it won't load the new variant"): a browser restoring this
+  // page from its back/forward cache (clicking a second deep link in the
+  // same tab, or using back/forward) fires 'pageshow' with persisted=true
+  // WITHOUT re-running this script -- init() (and the applyLinkFromURL()
+  // call above) never runs again, so the page just sits on whatever
+  // variant was selected before, ignoring the new URL. Re-apply the link
+  // specifically on a bfcache restore; a normal fresh load already got it
+  // from the call above, so this only fires the EXTRA time it's needed.
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) applyLinkFromURL();
+  });
+}
+
+// ---- Deep link: ?gene=GENE&v=VARIANT loads and selects that variant ----
+async function applyLinkFromURL() {
+  const linkParams = new URLSearchParams(window.location.search);
+  const linkGene = linkParams.get('gene');
+  const linkVariant = linkParams.get('v');
+  if (!linkGene || !geneParams[linkGene]) return;
+
+  geneSelect.value = linkGene;
+  selectedGene = linkGene;
+  await loadGeneData(linkGene);
+  if (linkVariant) {
+    const record = (geneCache[linkGene] || []).find(r => r.v === linkVariant);
+    if (record) {
+      selectVariant(linkGene, record);
+    } else {
+      showResultsMsg(`Variant "${linkVariant}" not found in ${linkGene}.`);
+    }
+  }
 }
 
 // ---- Gene selection ----
@@ -287,6 +322,12 @@ function hideResults() {
 function selectVariant(gene, record) {
   hideResults();
   variantSearch.value = record.p || record.v;
+
+  // Keep the URL shareable/bookmarkable for this exact variant.
+  const linkParams = new URLSearchParams(window.location.search);
+  linkParams.set('gene', gene);
+  linkParams.set('v', record.v);
+  history.replaceState(null, '', '?' + linkParams.toString());
 
   // Update info card
   document.getElementById('disp-gene').textContent = gene;
